@@ -69,21 +69,3 @@ COMMENT ON COLUMN public.spins.slot_volatility IS 'Per-slot category: low / med 
 COMMENT ON COLUMN public.spins.bet_amount IS 'Spin bet';
 COMMENT ON COLUMN public.spins.win_amount IS 'Spin win';
 COMMENT ON COLUMN public.spins.feature_buy IS '1 if the spin represents a "feature buy" style bet spike';
-
-ALTER TABLE ONLY public.players
-    ADD CONSTRAINT players_pkey PRIMARY KEY (player_id);
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT sessions_pkey PRIMARY KEY (session_id);
-
-ALTER TABLE ONLY public.spins
-    ADD CONSTRAINT spins_pkey PRIMARY KEY (spin_id);
-
-ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT fk_sessions_player FOREIGN KEY (player_id) REFERENCES public.players(player_id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY public.spins
-    ADD CONSTRAINT fk_spins_session FOREIGN KEY (session_id) REFERENCES public.sessions(session_id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY public.spins
-    ADD CONSTRAINT fk_spins_player FOREIGN KEY (player_id) REFERENCES public.players(player_id) ON DELETE CASCADE;
