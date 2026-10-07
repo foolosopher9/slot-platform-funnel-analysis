@@ -1,4 +1,6 @@
-DROP TABLE IF EXISTS spins, sessions, players;
+DROP TABLE IF EXISTS spins CASSCADE;
+DROP TABLE IF EXISTS sessions CASCADE;
+DROP TABLE IF EXISTS players CASCADE;
 
 CREATE TABLE public.players (
     player_id bigint NOT NULL,
