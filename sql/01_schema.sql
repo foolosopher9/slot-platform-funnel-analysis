@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS spins CASSCADE;
+DROP TABLE IF EXISTS spins CASCADE;
 DROP TABLE IF EXISTS sessions CASCADE;
 DROP TABLE IF EXISTS players CASCADE;
 
@@ -45,6 +45,7 @@ COMMENT ON COLUMN public.players.country IS 'Player-declared country';
 COMMENT ON COLUMN public.players.acquisition_channel IS 'Marketing channel (affiliate / paid_search / paid_social / organic / referral)';
 COMMENT ON COLUMN public.players.device_pref IS 'Preferred device type (mobile / desktop)';
 COMMENT ON COLUMN public.players.os IS 'Operating system, consistent with device type';
+
 COMMENT ON COLUMN public.sessions.session_id IS 'Unique session identifier';
 COMMENT ON COLUMN public.sessions.player_id IS 'FK to players';
 COMMENT ON COLUMN public.sessions.start_ts IS 'Session start time';
@@ -58,6 +59,7 @@ COMMENT ON COLUMN public.sessions.num_spins IS 'Number of spins in the session';
 COMMENT ON COLUMN public.sessions.avg_bet IS 'Mean bet amount in the session';
 COMMENT ON COLUMN public.sessions.max_bet IS 'Max bet amount in the session';
 COMMENT ON COLUMN public.sessions.spins_per_min IS 'num_spins / (duration_sec / 60)';
+
 COMMENT ON COLUMN public.spins.spin_id IS 'Unique spin identifier';
 COMMENT ON COLUMN public.spins.session_id IS 'FK to sessions';
 COMMENT ON COLUMN public.spins.player_id IS 'FK to players';
@@ -78,10 +80,10 @@ ALTER TABLE ONLY public.spins
     ADD CONSTRAINT spins_pkey PRIMARY KEY (spin_id);
 
 ALTER TABLE ONLY public.sessions
-    ADD CONSTRAINT fk_sessions_player FOREIGN KEY (player_id) REFERENCES public.players(player_id);
+    ADD CONSTRAINT fk_sessions_player FOREIGN KEY (player_id) REFERENCES public.players(player_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.spins
-    ADD CONSTRAINT fk_spins_session FOREIGN KEY (session_id) REFERENCES public.sessions(session_id);
+    ADD CONSTRAINT fk_spins_session FOREIGN KEY (session_id) REFERENCES public.sessions(session_id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.spins
-    ADD CONSTRAINT fk_spins_player FOREIGN KEY (player_id) REFERENCES public.players(player_id);
+    ADD CONSTRAINT fk_spins_player FOREIGN KEY (player_id) REFERENCES public.players(player_id) ON DELETE CASCADE;
