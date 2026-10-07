@@ -23,25 +23,30 @@ done
 
 # --- 1. Create empty tables ------------------------------------------------
 
-echo "[1/4] Creating schema (drop + create tables)..."
+echo "[1/5] Creating schema (drop + create tables)..."
 psql -q -v ON_ERROR_STOP=1 -d "$DB" -f sql/01a_schema.sql
 
 # --- 2. Load data ----------------------------------------------------------
 
 for t in players sessions spins; do
-  echo "[2/4] Loading $t.csv..."
+  echo "[2/5] Loading $t.csv..."
   psql -v ON_ERROR_STOP=1 -d "$DB" \
     -c "\copy $t FROM 'data/raw/$t.csv' WITH (FORMAT csv, HEADER true)"
 done
 
 # --- 3. Add primary/foreign keys + refresh stats ---------------------------
 
-echo "[3/4] Adding constraints and running ANALYZE..."
+echo "[3/5] Adding constraints and running ANALYZE..."
 psql -q -v ON_ERROR_STOP=1 -d "$DB" -f sql/01b_constraints.sql
 
-# --- 4. Verify row counts --------------------------------------------------
+# --- 4. Create analytical indexes ------------------------------------------
 
-echo "[4/4] Verifying row counts..."
+echo "[4/5] Creating indexes..."
+psql -q -v ON_ERROR_STOP=1 -d "$DB" -f sql/04_indexes.sql
+
+# --- 5. Verify row counts --------------------------------------------------
+
+echo "[5/5] Verifying row counts..."
 psql -d "$DB" -c "
 SELECT 'players' AS table_name, count(*) AS rows FROM players
 UNION ALL
