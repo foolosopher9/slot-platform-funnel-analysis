@@ -75,54 +75,39 @@ GROUP BY
 ORDER BY
   players DESC;
 
-/* Key metrics profiling: min, avg, max for numeric fields */
+/* Key metrics profiling: min, median, avg, max for numeric fields (raw data) */
 SELECT
   'session.duration_sec' AS metric,
   MIN(duration_sec) AS min,
+  percentile_cont(0.5) WITHIN GROUP (ORDER BY duration_sec)::numeric AS median,
   ROUND(AVG(duration_sec)::numeric, 1) AS avg,
   MAX(duration_sec) AS max
-FROM
-  sessions
+FROM sessions
 UNION ALL
-SELECT
-  'session.num_spins',
-  MIN(num_spins),
-  ROUND(AVG(num_spins)::numeric, 1),
-  MAX(num_spins)
-FROM
-  sessions
+SELECT 'session.num_spins', MIN(num_spins),
+  percentile_cont(0.5) WITHIN GROUP (ORDER BY num_spins)::numeric,
+  ROUND(AVG(num_spins)::numeric, 1), MAX(num_spins)
+FROM sessions
 UNION ALL
-SELECT
-  'session.avg_bet',
-  MIN(avg_bet),
-  ROUND(AVG(avg_bet)::numeric, 2),
-  MAX(avg_bet)
-FROM
-  sessions
+SELECT 'session.avg_bet', MIN(avg_bet),
+  ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY avg_bet)::numeric, 2),
+  ROUND(AVG(avg_bet)::numeric, 2), MAX(avg_bet)
+FROM sessions
 UNION ALL
-SELECT
-  'session.spins_per_min',
-  MIN(spins_per_min),
-  ROUND(AVG(spins_per_min)::numeric, 1),
-  MAX(spins_per_min)
-FROM
-  sessions
+SELECT 'session.spins_per_min', MIN(spins_per_min),
+  ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY spins_per_min)::numeric, 2),
+  ROUND(AVG(spins_per_min)::numeric, 1), MAX(spins_per_min)
+FROM sessions
 UNION ALL
-SELECT
-  'spin.bet_amount',
-  MIN(bet_amount),
-  ROUND(AVG(bet_amount)::numeric, 2),
-  MAX(bet_amount)
-FROM
-  spins
+SELECT 'spin.bet_amount', MIN(bet_amount),
+  ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY bet_amount)::numeric, 2),
+  ROUND(AVG(bet_amount)::numeric, 2), MAX(bet_amount)
+FROM spins
 UNION ALL
-SELECT
-  'spin.win_amount',
-  MIN(win_amount),
-  ROUND(AVG(win_amount)::numeric, 2),
-  MAX(win_amount)
-FROM
-  spins;
+SELECT 'spin.win_amount', MIN(win_amount),
+  ROUND(percentile_cont(0.5) WITHIN GROUP (ORDER BY win_amount)::numeric, 2),
+  ROUND(AVG(win_amount)::numeric, 2), MAX(win_amount)
+FROM spins;
 
 /* Overall RTP (Return to Player) */
 SELECT
