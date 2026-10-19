@@ -20,6 +20,21 @@ for t in players sessions spins; do
   fi
 done
 
+# Check that the PostgreSQL server is running
+if ! pg_isready -q; then
+  echo "ERROR: PostgreSQL server is not running. Start it and try again." >&2
+  exit 1
+fi
+
+# Hide NOTICE messages such as "table does not exist, skipping"
+export PGOPTIONS="-c client_min_messages=warning"
+
+# Create the database on first run
+if ! psql -d "$DB" -Atc "SELECT 1" >/dev/null 2>&1; then
+  echo "Database $DB not found, creating..."
+  createdb "$DB"
+fi
+
 # 1. Create empty tables
 echo "[1/4] Creating tables..."
 psql -q -v ON_ERROR_STOP=1 -d "$DB" -f sql/01_schema.sql
@@ -38,11 +53,11 @@ psql -q -v ON_ERROR_STOP=1 -d "$DB" -f sql/02_keys_indexes.sql
 # 4. Show row counts
 echo "[4/4] Row counts:"
 psql -d "$DB" -c "
-SELECT 'players' AS table_name, count(*) AS rows FROM players
+SELECT 'players' AS table_name, COUNT(*) AS row_count FROM players
 UNION ALL
-SELECT 'sessions', count(*) FROM sessions
+SELECT 'sessions', COUNT(*) FROM sessions
 UNION ALL
-SELECT 'spins', count(*) FROM spins;
+SELECT 'spins', COUNT(*) FROM spins;
 "
 
 echo "Done. Database: $DB"
