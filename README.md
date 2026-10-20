@@ -25,6 +25,7 @@ sql/
   03_quality_checks.sql    проверки качества (раздел 1.3)
   04_profiling.sql         профиль данных (разделы 1.1 и 1.4)
   05_window.sql            окно наблюдения и порог активного игрока (глава 2)
+  06_multiaccount_check.sql  признаки мультиаккаунтинга (глава 2)
 scripts/
   load.sh                  сборка базы из CSV
 data/raw/                  CSV с Kaggle (не хранятся в репозитории)
