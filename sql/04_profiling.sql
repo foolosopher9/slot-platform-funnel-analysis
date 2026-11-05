@@ -69,6 +69,32 @@ GROUP BY players.country
 ORDER BY players_count DESC;
 
 
+/* Players by channel and country: share of each country within the channel, % */
+WITH channel_players AS (
+  SELECT
+    players.acquisition_channel,
+    players.country,
+    COUNT(players.player_id) OVER (PARTITION BY players.acquisition_channel) AS channel_players_count
+  FROM players
+)
+SELECT
+  channel_players.acquisition_channel,
+  MAX(channel_players.channel_players_count) AS players,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'RS') / MAX(channel_players.channel_players_count), 1) AS rs,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'DE') / MAX(channel_players.channel_players_count), 1) AS de,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'GB') / MAX(channel_players.channel_players_count), 1) AS gb,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'FR') / MAX(channel_players.channel_players_count), 1) AS fr,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'IT') / MAX(channel_players.channel_players_count), 1) AS it,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'NL') / MAX(channel_players.channel_players_count), 1) AS nl,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'ES') / MAX(channel_players.channel_players_count), 1) AS es,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'SE') / MAX(channel_players.channel_players_count), 1) AS se,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'PL') / MAX(channel_players.channel_players_count), 1) AS pl,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE channel_players.country = 'NO') / MAX(channel_players.channel_players_count), 1) AS no
+FROM channel_players
+GROUP BY channel_players.acquisition_channel
+ORDER BY players DESC;
+
+
 /* Signups: median date by channel and by country */
 SELECT
   'channel' AS segment_type,
@@ -226,7 +252,7 @@ ORDER BY spins_count DESC;
 /* 1.4. Bet concentration */
 
 
-/* Bet percentiles: per spin and per session */
+/* Bet percentiles per spin */
 SELECT
   'spin.bet_amount' AS metric,
   ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY spins.bet_amount)::numeric, 2) AS p50,
@@ -234,17 +260,7 @@ SELECT
   ROUND(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY spins.bet_amount)::numeric, 2) AS p99,
   ROUND(PERCENTILE_CONT(0.999) WITHIN GROUP (ORDER BY spins.bet_amount)::numeric, 2) AS p999,
   MAX(spins.bet_amount) AS max_value
-FROM spins
-UNION ALL
-SELECT
-  'session.avg_bet',
-  ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY sessions.avg_bet)::numeric, 2),
-  ROUND(PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY sessions.avg_bet)::numeric, 2),
-  ROUND(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY sessions.avg_bet)::numeric, 2),
-  ROUND(PERCENTILE_CONT(0.999) WITHIN GROUP (ORDER BY sessions.avg_bet)::numeric, 2),
-  MAX(sessions.avg_bet)
-FROM sessions
-WHERE sessions.num_spins > 0;
+FROM spins;
 
 
 /* Bets above p99.9: turnover share, players, feature_buy share */
@@ -283,6 +299,21 @@ SELECT
   CEIL(MAX(ranked_players.players_count) * 0.01) AS top1pct_players,
   ROUND(100.0 * SUM(ranked_players.turnover) FILTER (WHERE ranked_players.turnover_rank <= CEIL(ranked_players.players_count * 0.01)) / MAX(ranked_players.total_turnover), 1) AS top1pct_players_pct
 FROM ranked_players;
+
+
+/* Players with at least one bet spike (feature_buy) among players with spins */
+WITH player_spikes AS (
+  SELECT
+    spins.player_id,
+    BOOL_OR(spins.feature_buy) AS has_spike
+  FROM spins
+  GROUP BY spins.player_id
+)
+SELECT
+  COUNT(player_spikes.player_id) AS players_with_spins,
+  COUNT(player_spikes.player_id) FILTER (WHERE player_spikes.has_spike) AS players_with_spike,
+  ROUND(100.0 * COUNT(player_spikes.player_id) FILTER (WHERE player_spikes.has_spike) / COUNT(player_spikes.player_id), 1) AS players_with_spike_pct
+FROM player_spikes;
 
 
 /* 1.4. Slots and volatility */
