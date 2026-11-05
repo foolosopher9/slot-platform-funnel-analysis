@@ -4,18 +4,20 @@
 /* 1.1. Source */
 
 
-/* Rows and time range per table */
+/* Rows and time range per table; for sessions max_ts is the last start, last_end_ts the last end */
 SELECT
   'players' AS table_name,
   COUNT(*) AS row_count,
   MIN(players.signup_ts) AS min_ts,
-  MAX(players.signup_ts) AS max_ts
+  MAX(players.signup_ts) AS max_ts,
+  NULL::timestamp AS last_end_ts
 FROM players
 UNION ALL
 SELECT
   'sessions',
   COUNT(*),
   MIN(sessions.start_ts),
+  MAX(sessions.start_ts),
   MAX(sessions.end_ts)
 FROM sessions
 UNION ALL
@@ -23,7 +25,8 @@ SELECT
   'spins',
   COUNT(*),
   MIN(spins.ts),
-  MAX(spins.ts)
+  MAX(spins.ts),
+  NULL::timestamp
 FROM spins;
 
 
@@ -292,7 +295,8 @@ WITH devices_per_player AS (
 )
 SELECT
   devices_per_player.devices_count,
-  COUNT(devices_per_player.player_id) AS players
+  COUNT(devices_per_player.player_id) AS players,
+  ROUND(100.0 * COUNT(devices_per_player.player_id) / SUM(COUNT(devices_per_player.player_id)) OVER (), 1) AS players_pct
 FROM devices_per_player
 GROUP BY devices_per_player.devices_count
 ORDER BY devices_per_player.devices_count;
