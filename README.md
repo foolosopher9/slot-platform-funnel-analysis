@@ -17,18 +17,20 @@
 
 ```
 report/
-  01_data.md               глава 1: данные
-  02_questions.md          глава 2: постановка задачи
+  01_data.md                 глава 1: данные
+  02_questions.md            глава 2: постановка задачи
 sql/
-  01_schema.sql            таблицы (до загрузки)
-  02_keys_indexes.sql      ключи и индексы (после загрузки)
-  03_quality_checks.sql    проверки качества (раздел 1.3)
-  04_profiling.sql         профиль данных (разделы 1.1 и 1.4)
-  05_window.sql            окно наблюдения и порог активного игрока (глава 2)
-  06_multiaccount_check.sql  признаки мультиаккаунтинга (глава 2)
+  01_schema.sql              таблицы (до загрузки, раздел 1.2)
+  02_keys_indexes.sql        ключи и индексы (после загрузки, раздел 1.2)
+  03_quality_checks.sql      проверки качества (раздел 1.3)
+  04_profiling.sql           профиль данных (разделы 1.1 и 1.4)
+  05_pace_check.sql          темп игры (раздел 1.5, ограничение 12)
+  06_window.sql              окно 90 дней и порог активного игрока (раздел 2.4)
+  07_geo_mismatch_rate.sql   фоновая частота geo_mismatch (раздел 2.4)
+  08_loss_window_check.sql   проверки окна из 10 спинов (раздел 2.4)
 scripts/
-  load.sh                  сборка базы из CSV
-data/raw/                  CSV с Kaggle (не хранятся в репозитории)
+  load.sh                    сборка базы из CSV
+data/raw/                    CSV с Kaggle (не хранятся в репозитории)
 ```
 
 ## Как воспроизвести
@@ -45,4 +47,11 @@ data/raw/                  CSV с Kaggle (не хранятся в репози�
    ```bash
    psql -d igaming -f sql/03_quality_checks.sql
    psql -d igaming -f sql/04_profiling.sql
+   psql -d igaming -f sql/05_pace_check.sql
+   ```
+4. Получите цифры главы 2:
+   ```bash
+   psql -d igaming -f sql/06_window.sql
+   psql -d igaming -f sql/07_geo_mismatch_rate.sql
+   psql -d igaming -f sql/08_loss_window_check.sql
    ```
