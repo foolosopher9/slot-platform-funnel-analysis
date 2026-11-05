@@ -1,4 +1,4 @@
-/* Multi-account signals: shared devices and IPs, devices per player, overlapping sessions */
+/* Compliance fields: shared devices and IPs, devices per player, overlapping sessions, report section 1.4 */
 
 
 /* Devices used by more than one player */
@@ -56,6 +56,7 @@ JOIN sessions AS second_session
   AND first_session.session_id < second_session.session_id
   AND first_session.start_ts < second_session.end_ts
   AND second_session.start_ts < first_session.end_ts;
+
 
 /* Players with at least one session on a device shared with another player */
 WITH players_per_device AS (
