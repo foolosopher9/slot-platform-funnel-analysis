@@ -65,3 +65,22 @@ JOIN players
   ON spins.player_id = players.player_id
 WHERE sessions.start_ts < players.signup_ts + INTERVAL '90 days'
   AND spins.ts >= players.signup_ts + INTERVAL '90 days';
+
+
+/* Window coverage: share of all sessions, spins and turnover that fall inside the 90-day window */
+SELECT
+  COUNT(*) FILTER (WHERE sessions.start_ts < players.signup_ts + INTERVAL '90 days') AS window_sessions,
+  COUNT(*) AS all_sessions,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE sessions.start_ts < players.signup_ts + INTERVAL '90 days') / COUNT(*), 1) AS window_sessions_pct
+FROM sessions
+JOIN players
+  ON sessions.player_id = players.player_id;
+
+SELECT
+  COUNT(*) FILTER (WHERE spins.ts < players.signup_ts + INTERVAL '90 days') AS window_spins,
+  COUNT(*) AS all_spins,
+  ROUND(100.0 * COUNT(*) FILTER (WHERE spins.ts < players.signup_ts + INTERVAL '90 days') / COUNT(*), 1) AS window_spins_pct,
+  ROUND(100.0 * SUM(spins.bet_amount) FILTER (WHERE spins.ts < players.signup_ts + INTERVAL '90 days') / SUM(spins.bet_amount), 1) AS window_turnover_pct
+FROM spins
+JOIN players
+  ON spins.player_id = players.player_id;
